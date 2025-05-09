@@ -1,9 +1,8 @@
-import styles from "./Request.module.scss";
 import { sendJsonRpcRequest } from "../../utils/connection";
 import React, { useEffect, useState } from "react";
-import SyncState from "../SyncState/SyncState";
+import BridgeState from "./BridgeState/BridgecState";
 
-const Request = () => {
+const Bridge = () => {
   const [response, setResponse] = useState(null);
 
   useEffect(() => {
@@ -40,11 +39,11 @@ const Request = () => {
   }, []);
 
   return (
-    <div className={styles.container}>
-      <SyncState data={response?.syncState} />
+    <div className="mt-10">
       <h3>{response ? response.accountAddress : "Loading..."}</h3>
+      <BridgeState data={response?.syncState} />
     </div>
   );
 };
 
-export default Request;
+export default Bridge;

@@ -1,11 +1,15 @@
 const express = require("express");
 const cors = require("cors");
-const { getValidatorData, getValidators } = require("./index");
+const {
+  getValidatorData,
+  getValidators,
+  getValidatorByAddress,
+} = require("./index");
 
 //const AUTH_TOKEN = process.env.AUTH_TOKEN || "tok"; // Replace with your actual token
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
@@ -13,6 +17,17 @@ let lastStatus = null;
 
 app.get("/api/", (req, res) => {
   res.send("Alert 1.0.0");
+});
+
+app.get("/api/getValidatorByAddress/:address", async (req, res) => {
+  const { address } = req.params;
+  try {
+    const data = await getValidatorByAddress(address);
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching validator by address:", error);
+    res.status(500).json({ error: "Failed to fetch validator by address" });
+  }
 });
 
 app.get("/api/status", async (req, res) => {
@@ -29,15 +44,26 @@ app.get("/api/validators/", async (req, res) => {
   }
 });
 
-async function updateStatus() {
+app.get("/api/validators/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    const data = await getValidatorData();
+    const data = await getValidatorData(id);
+    res.json(data);
+    console.log(data);
+  } catch (error) {
+    console.error("Error fetching validator data:", error);
+    res.status(500).json({ error: "Failed to fetch validator data" });
+  }
+});
+
+async function updateStatus(id) {
+  try {
+    const data = await getValidatorData(id);
     lastStatus = data;
   } catch (error) {
     console.error("Error updating status:", error);
   }
 }
-setInterval(updateStatus, 1000); // Update status every 5 minutes
 
 app.listen(PORT, () => {
   console.log(`Backend API running on http://localhost:${PORT}`);

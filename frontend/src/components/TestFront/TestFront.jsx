@@ -1,41 +1,60 @@
 import { useEffect, useState } from "react";
-// import './App.css';
 
 function TestFront() {
-  const [status, setStatus] = useState(null);
-  const [peers, setPeers] = useState(null);
+  const [address, setAddress] = useState(""); // Стан для введеної адреси
+  const [validatorId, setValidatorId] = useState(null); // Стан для ID валідатора
+  const [data, setData] = useState([]); // Стан для даних валідаторів
 
+  // Функція для отримання даних валідаторів
   useEffect(() => {
-    fetch("http://localhost:3001/api/status")
-      .then((res) => res.json())
-      .then(setStatus)
-      .catch(console.error);
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/validators/"); // Замініть URL на ваш API
+        const result = await response.json();
+        setData(result); // Припускаємо, що API повертає масив валідаторів
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-    // fetch("http://localhost:3001/api/peers")
-    //   .then((res) => res.json())
-    //   .then(setPeers)
-    //   .catch(console.error);
-  }, [1000]);
+    fetchData();
+  }, []);
+
+  // Функція для пошуку валідатора за адресою
+  const handleSearch = () => {
+    if (data && data.length > 0) {
+      const validator = data.find(
+        (validator) =>
+          validator.address.hash === address ||
+          validator.delegator.hash === address
+      );
+      if (validator) {
+        setValidatorId(validator.id); // Зберігаємо ID знайденого валідатора
+      } else {
+        setValidatorId("Validator not found"); // Якщо валідатор не знайдений
+      }
+    }
+  };
 
   return (
-    <div className="p-4 text-white bg-gray-900 min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">🌉 Celestia Bridge Dashboard</h1>
-
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold">Node Status</h2>
-        <pre className="bg-gray-800 p-2 rounded mt-2 overflow-x-auto">
-          {status
-            ? JSON.stringify(status.result.height, null, 2)
-            : "Loading..."}
-        </pre>
-      </section>
-
-      <section>
-        <h2 className="text-xl font-semibold">Peers</h2>
-        <pre className="bg-gray-800 p-2 rounded mt-2 overflow-x-auto">
-          {peers ? JSON.stringify(peers, null, 2) : "Loading..."}
-        </pre>
-      </section>
+    <div>
+      <h1>Test Frontend</h1>
+      <h2>Validator ID: {validatorId || "Enter an address to search"}</h2>
+      <div className="mt-4">
+        <input
+          id="validatorAddress"
+          className="border-2 border-blue-400 rounded p-2 mr-2"
+          placeholder="Enter validator address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)} // Оновлюємо стан адреси
+        />
+        <button
+          className="bg-blue-500 text-white rounded p-2 hover:bg-blue-600"
+          onClick={handleSearch} // Викликаємо пошук при натисканні кнопки
+        >
+          Search
+        </button>
+      </div>
     </div>
   );
 }

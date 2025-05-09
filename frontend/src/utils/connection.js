@@ -1,7 +1,6 @@
 import axios from "axios";
 
-export const AUTH_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIl0sIk5vbmNlIjoibFdSQU5vaHhtOGRNOUZGRFgwc21wTUtaS21rcmd6RWFTcFp4eGE4WWxmVT0iLCJFeHBpcmVzQXQiOiIwMDAxLTAxLTAxVDAwOjAwOjAwWiJ9.OvkCwB8QL5JFjrL6lkrQsXeAWj0zVOCEEj9FIl2FH9o"; // Убедитесь, что AUTH_TOKEN определен в .env файле
+export const AUTH_TOKEN = import.meta.env.VITE_AUTH_TOKEN || ""; // Убедитесь, что AUTH_TOKEN определен в .env файле
 
 export const sendJsonRpcRequest = async (url, method, params = [], id = 1) => {
   try {
@@ -30,7 +29,6 @@ export const sendJsonRpcRequest = async (url, method, params = [], id = 1) => {
       },
     });
 
-    console.log("Response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error sending JSON-RPC request:", error.message);

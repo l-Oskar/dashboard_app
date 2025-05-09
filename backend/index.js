@@ -1,11 +1,8 @@
 const axios = require("axios");
 const cron = require("node-cron");
-const {
-  API_URL,
-  CHECK_INTERVAL_CRON,
-  BOT_TOKEN,
-  CHAT_ID,
-} = require("./config");
+const { CHECK_INTERVAL_CRON, BOT_TOKEN, CHAT_ID } = require("./config");
+
+const API_URL = `https://api-mocha.celenium.io/v1/validators/`;
 
 async function sendTelegramMessage(message) {
   try {
@@ -27,9 +24,9 @@ async function sendTelegramMessage(message) {
   }
 }
 
-async function getValidatorData() {
+async function getValidatorData(validatorId) {
   try {
-    const response = await axios.get(API_URL);
+    const response = await axios.get(`${API_URL}${validatorId}`);
     const data = response.data;
     return data;
   } catch (error) {
@@ -39,9 +36,7 @@ async function getValidatorData() {
 
 async function getValidators() {
   try {
-    const response = await axios.get(
-      "https://api-mocha.celenium.io/v1/validators?limit=100"
-    );
+    const response = await axios.get(`${API_URL}?limit=100`);
     const data = response.data;
     return data;
   } catch (error) {
@@ -49,9 +44,28 @@ async function getValidators() {
   }
 }
 
-async function checkValidatorStatus() {
+async function getValidatorByAddress(address) {
   try {
-    const data = await getValidatorData();
+    const validators = await getValidators();
+    const validator = validators.find(
+      (validator) =>
+        validator.address.hash === address ||
+        validator.delegator.hash === address
+    );
+    if (validator) {
+      return validator;
+    } else {
+      console.error("Validator not found");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching validator by address:", error);
+  }
+}
+
+async function checkValidatorStatus(id) {
+  try {
+    const data = await getValidatorData(id);
 
     const jailed = data.jailed;
     const votingPower = Number(data.voting_power || 0);
@@ -83,4 +97,5 @@ module.exports = {
   getValidatorData,
   checkValidatorStatus,
   getValidators,
+  getValidatorByAddress,
 };
